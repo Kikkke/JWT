@@ -1,5 +1,5 @@
-CREATE DATABASE jwt_db;
-USE jwt_db;
+CREATE DATABASE jwt_demo;
+USE jwt_demo;
 
 CREATE TABLE usuarios(
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -10,3 +10,5 @@ CREATE TABLE usuarios(
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL
 );
+select *from usuarios;
+-- drop database jwt_db;
