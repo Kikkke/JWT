@@ -1,46 +1,172 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro</title>
+    <title>Registro de Usuario</title>
+    <!-- Bootstrap 5 CDN modo oscuro -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #181a1b;
+            color: #e3e6e8;
+            min-height: 100vh;
+        }
+        .form-container {
+            background: #23272b;
+            padding: 2rem 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 32px #000a;
+            margin-top: 48px;
+        }
+        .form-label {
+            color: #9fa5b0;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #1976d2 0%, #0d47a1 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(90deg, #1565c0 0%, #0d47a1 100%);
+        }
+        .form-control, .form-control:focus {
+            background: #23272b;
+            color: #e3e6e8;
+            border: 1px solid #31363b;
+            box-shadow: none;
+        }
+        .error-message {
+            color: #ff8a80;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+        a {
+            color: #90caf9;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .logo-title {
+            text-align: center;
+            color: #64b5f6;
+            letter-spacing: 1px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+    </style>
 </head>
 <body>
-    <h2>Formulario de Registro</h2>
-    <form action="" id="registerform">
-        <input type="email"  id="email" placeholder="Correo" required>
-        <input type="password"  id="password" placeholder="Ingrese la contrasena" required>
-        <button type="submit" >Registrarse</button>
-    </form>
-    <p>Ya tienes una cuenta <a href="./index.html">incia sesion</a></p>
-
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="form-container shadow-lg col-12 col-md-7 col-lg-5">
+            <div class="logo-title">
+                <h2>Registro de Usuario</h2>
+            </div>
+            <form id="registerForm" autocomplete="off" novalidate>
+                <div id="error" class="error-message"></div>
+                <div class="row">
+                    <div class="mb-3 col-12 col-md-6">
+                        <label for="nombre" class="form-label">Nombre*</label>
+                        <input type="text" class="form-control" id="nombre" placeholder="Nombre" required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" title="Solo letras">
+                    </div>
+                    <div class="mb-3 col-12 col-md-6">
+                        <label for="segundo_nombre" class="form-label">Segundo Nombre</label>
+                        <input type="text" class="form-control" id="segundo_nombre" placeholder="Segundo Nombre (opcional)" pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]*" title="Solo letras">
+                    </div>
+                    <div class="mb-3 col-12 col-md-6">
+                        <label for="apellido_paterno" class="form-label">Apellido Paterno*</label>
+                        <input type="text" class="form-control" id="apellido_paterno" placeholder="Apellido Paterno" required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" title="Solo letras">
+                    </div>
+                    <div class="mb-3 col-12 col-md-6">
+                        <label for="apellido_materno" class="form-label">Apellido Materno*</label>
+                        <input type="text" class="form-control" id="apellido_materno" placeholder="Apellido Materno" required pattern="[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+" title="Solo letras">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Correo Electrónico*</label>
+                    <input type="email" class="form-control" id="email" placeholder="Correo electrónico" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Contraseña*</label>
+                    <input type="password" class="form-control" id="password" placeholder="Contraseña (mínimo 6 caracteres)" required minlength="6">
+                </div>
+                <div class="mb-3">
+                    <label for="confirmarPassword" class="form-label">Confirmar Contraseña*</label>
+                    <input type="password" class="form-control" id="confirmarPassword" placeholder="Repite la contraseña" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mb-2">Registrarse</button>
+                <div class="text-center my-1">
+                    ¿Ya tienes cuenta? <a href="bienvenida.html">Inicia sesión</a>
+                </div>
+                <div class="text-center">
+                    <a href="index.html">Volver a carátula</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Bootstrap JS (opcional, solo para validaciones de BS) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById('registerform').addEventListener('submit', async(e) => {
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = "";
+
+            // Validación JS adicional
+            const nombre = document.getElementById('nombre').value.trim();
+            const segundo_nombre = document.getElementById('segundo_nombre').value.trim();
+            const apellido_paterno = document.getElementById('apellido_paterno').value.trim();
+            const apellido_materno = document.getElementById('apellido_materno').value.trim();
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            try{
-                const res = await fetch('http://localhost:3000/api/auth/register', {
-                    //los encabezados de la respuesta
-                    method : 'POST',
-                    headers : {'Content-Type' : 'application/json'},
-                    body : JSON.stringify({email, password})
-                });
+            const confirmarPassword = document.getElementById('confirmarPassword').value;
 
-                const data = await res.json();
-                if(res.ok){
-                    alert('usuario registrado');
-                    window.location.href = 'index.html'
-                }else{
-                    alert('error al registrar');
-                }
-
-            }catch(err){
-                console.log('Error en la peticion del lregistro', err);
-                alert('Error en la red o el servicio');
+            // Validar solo letras (aunque el HTML ya lo hace)
+            const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+            if (!soloLetras.test(nombre) || !soloLetras.test(apellido_paterno) || !soloLetras.test(apellido_materno)) {
+                errorDiv.textContent = "Nombres y apellidos solo pueden contener letras.";
+                return;
             }
-        })
-        
+            if (segundo_nombre && !soloLetras.test(segundo_nombre)) {
+                errorDiv.textContent = "Segundo nombre solo puede contener letras.";
+                return;
+            }
+            // Validar email simple
+            if (!/\S+@\S+\.\S+/.test(email)) {
+                errorDiv.textContent = "Correo electrónico inválido.";
+                return;
+            }
+            // Validar contraseñas
+            if (password.length < 6 || confirmarPassword.length < 6) {
+                errorDiv.textContent = "Las contraseñas deben tener al menos 6 caracteres.";
+                return;
+            }
+            if (password !== confirmarPassword) {
+                errorDiv.textContent = "Las contraseñas no coinciden.";
+                return;
+            }
+
+            // Enviar al backend
+            try {
+                const res = await fetch('http://localhost:3000/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, segundo_nombre, apellido_paterno, apellido_materno, email, password, confirmarPassword })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    errorDiv.style.color = "#67e395";
+                    errorDiv.textContent = "Usuario registrado correctamente. Redirigiendo...";
+                    setTimeout(() => window.location.href = "bienvenida.html", 1200);
+                } else {
+                    errorDiv.style.color = "#ff8a80";
+                    errorDiv.textContent = data.message || "Error al registrar.";
+                }
+            } catch (err) {
+                errorDiv.style.color = "#ff8a80";
+                errorDiv.textContent = "Error en la red o el servicio.";
+            }
+        });
     </script>
 </body>
 </html>

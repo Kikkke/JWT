@@ -1,62 +1,107 @@
-const express = require('express')
+const express = require('express');
 const router = express.Router();
-const bvrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const db = require('./bd');
+const db = require('../bd'); // asegúrate que la ruta es correcta según tu estructura
 
+// Ruta para el registro extendido
+router.post('/register', async (req, res) => {
+    const {
+        nombre,
+        segundo_nombre,
+        apellido_paterno,
+        apellido_materno,
+        email,
+        password,
+        confirmarPassword
+    } = req.body;
 
-//ruta para el registro
-router.post('/register', async(req, res) => {
-    const {email, password} = req.body;
-    try{
-        //aqui es donde es importante recordar que para el campo de pass hay que hasheado
-        const hashed = await bvrypt.hash(password, 10);
-        db.query('INSERT INTO usuarios (email, password) VALUES (? , ?)', [email, hashed], (err, result) => {
-            if(err){
-                console.log('Error al registrar al usuario', err);
-                return res.status(500).send('Error al registrar');
-                //res.send(pagina o al mensaje)
+    // Validación básica en el backend
+    if (!nombre || !apellido_paterno || !apellido_materno || !email || !password || !confirmarPassword) {
+        return res.status(400).json({ message: "Todos los campos obligatorios deben llenarse." });
+    }
+
+    // Validar que la contraseña y su confirmación coincidan
+    if (password !== confirmarPassword) {
+        return res.status(400).json({ message: "Las contraseñas no coinciden." });
+    }
+
+    // Opcional: puedes agregar validaciones de formato aquí
+
+    try {
+        // Hash de la contraseña
+        const hashed = await bcrypt.hash(password, 10);
+
+        // Insertar usuario en la base de datos
+        db.query(
+            'INSERT INTO usuarios (nombre, segundo_nombre, apellido_paterno, apellido_materno, email, password) VALUES (?, ?, ?, ?, ?, ?)',
+            [nombre, segundo_nombre, apellido_paterno, apellido_materno, email, hashed],
+            (err, result) => {
+                if (err) {
+                    if (err.code === 'ER_DUP_ENTRY') {
+                        return res.status(400).json({ message: "El correo ya está registrado." });
+                    }
+                    console.log('Error al registrar al usuario', err);
+                    return res.status(500).json({ message: 'Error al registrar' });
+                }
+                console.log("Usuario registrado con el ID", result.insertId);
+                res.status(200).json({ message: 'Usuario Registrado' });
             }
-            //debugg
-            console.log("Usuario registrado con el ID", result.insertId);
-            res.status(200).send('Usuario Registrado');
-        });
-    } catch(error){
-        console.log('Error en el servidor al momento de registrar {register}: ', error);
-        res.status(500).send('Error interno del servidor');
+        );
+    } catch (error) {
+        console.log('Error en el servidor al momento de registrar: ', error);
+        res.status(500).json({ message: 'Error interno del servidor' });
     }
 });
 
-//ruta de login
+// Login de usuario
 router.post('/login', (req, res) => {
-    db.query('SELECT * FROM usuarios WHERE email = ? ', [email], async(err, result) =>{
-        if(err){
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ message: "Email y contraseña son requeridos." });
+    }
+
+    db.query('SELECT * FROM usuarios WHERE email = ?', [email], async (err, result) => {
+        if (err) {
             console.log('Error en la consulta del login: ', err);
-            return res.status(500).send('Error en el servidor');
-        }
-        //cuando no se encontro el email
-        if(result.length === 0){
-            console.log('Usuario no encontrado : ', err);
-            return res.status(500).send('Credenciales invalidas');
+            return res.status(500).json({ message: 'Error en el servidor' });
         }
 
-        //si existe
-        const user = result[0];
-        //validar el pass haseado
-        const valid = await bcrypt.compare(password, user.password);
-        if(!valid){
-            console.warn("Contraseña incorrecta para usuario, ", email);
-            return res.status(401).send('Contraseña incorrecta user no autorizado');
+        if (result.length === 0) {
+            return res.status(401).json({ message: 'Credenciales inválidas' });
         }
+
+        const user = result[0];
+        const valid = await bcrypt.compare(password, user.password);
+
+        if (!valid) {
+            return res.status(401).json({ message: 'Contraseña incorrecta, usuario no autorizado' });
+        }
+
+        // El payload puede incluir solo lo necesario
         const token = jwt.sign(
-            { id:user.id, email:user.email},
-            //proceso del hash
+            { 
+                id: user.id, 
+                email: user.email,
+                nombre: user.nombre,
+                apellido_paterno: user.apellido_paterno
+            },
             process.env.JWT_SECRET,
-            { expiresIn:'1h' }
+            { expiresIn: '1h' }
         );
-        console.log('Token Generado para el usuario: ', user.email);
-        res.json({token});
+        res.json({ 
+            token,
+            user: {
+                id: user.id,
+                nombre: user.nombre,
+                segundo_nombre: user.segundo_nombre,
+                apellido_paterno: user.apellido_paterno,
+                apellido_materno: user.apellido_materno,
+                email: user.email
+            }
+        });
     });
 });
-//cambio
-module.exports = router
+
+module.exports = router;
